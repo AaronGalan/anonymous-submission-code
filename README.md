@@ -120,9 +120,9 @@ bash scripts/train_mmed_kgrl.sh \
   --language=English \
   --subdir=2hop \
   --model=Qwen2.5-7B-Instruct \
-  --kgrl_reward_mode=light_weighted_eweight0_alpha2_beta3 \
+  --kgrl_reward_mode=full_lambda2 \
   --device=0,1,2,3 \
-  --now=<experiment_timestamp>
+  --now=xxx
 ```
 
 Main arguments:
@@ -154,12 +154,12 @@ To evaluate a trained checkpoint on MMedBench, run:
 
 ```bash
 bash scripts/test_checkpoint_mmedbench.sh \
-  --subset=2hop \
+  --subset=vanilla \
   --language=English \
   --model=Qwen2.5-7B-Instruct \
-  --kgrl_reward_mode=light_weighted_eweight0_alpha2_beta3 \
+  --kgrl_reward_mode=full_lambda2 \
   --ckpt=last \
-  --now=<experiment_timestamp> \
+  --now=xxx_2hop \
   --devices=0,1,2,3
 ```
 
