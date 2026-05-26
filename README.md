@@ -8,11 +8,11 @@ The release documents the main training and testing pipeline used in our experim
 
 ```text
 kgrlvr/
-├── kgrl_reward.py
-├── compute_generation_acc.py
-├── utils/
-├── scripts/
-└── chat/
+|-- kgrl_reward.py
+|-- compute_generation_acc.py
+|-- utils/
+|-- scripts/
+`-- chat/
 ```
 
 - `kgrl_reward.py`: custom reward implementation used by the RL trainer.
@@ -56,30 +56,30 @@ The provided scripts assume the following local directory structure:
 
 ```text
 kgrlvr/
-├── data/
-�?  └── MMedBench/
-�?      └── <subset>/
-�?          ├── train-<language>.parquet
-�?          └── test-<language>.parquet
-├── models/
-�?  └── <model_name>/
-├── checkpoint/
-├── scripts/
-�?  ├── train_mmed_kgrl.sh
-�?  └── test_checkpoint_mmedbench.sh
-├── kgrl_reward.py
-└── compute_generation_acc.py
+|-- data/
+|   `-- MMedBench/
+|       `-- <subset>/
+|           |-- train-<language>.parquet
+|           `-- test-<language>.parquet
+|-- models/
+|   `-- <model_name>/
+|-- checkpoint/
+|-- scripts/
+|   |-- train_mmed_kgrl.sh
+|   `-- test_checkpoint_mmedbench.sh
+|-- kgrl_reward.py
+`-- compute_generation_acc.py
 ```
 
 The training and evaluation scripts expect prepared `.parquet` files under `data/MMedBench/<subset>/` and a local HuggingFace-style model directory under `models/<model_name>/`.
 
 ## Data Format
 
-The scripts assume that each training or evaluation example has been converted into a record compatible with the `verl` data interface. A representative example is shown below:
+The scripts assume that each training or evaluation example has been converted into a record compatible with the `verl` data interface. A representative schema is shown below:
 
 ```python
 {
-    "data_source": "MMedBench",
+    "data_source": str,
     "prompt": [
         {
             "role": str,
@@ -88,19 +88,19 @@ The scripts assume that each training or evaluation example has been converted i
     ],
     "ability": str,
     "reward_model": {
-        "style": "rule",
-        "ground_truth": str,
+        "style": str,
+        "ground_truth": str
     },
     "extra_info": {
         "split": str,
         "index": int,
         "answer": str,
         "question": str,
-        "options": dict{str: str},
+        "options": dict[str, str],
         "meta_info": str,
         "answer_idx": str,
-        "rationale": "",
-        "metamap_phrases": [],
+        "rationale": str,
+        "metamap_phrases": list[str],
         "human_checked": bool,
         "human_check_passed": bool,
         "extend_entities": list[str],
@@ -132,6 +132,7 @@ Main arguments:
 - `--model`: local model directory name under `models/`.
 - `--kgrl_reward_mode`: reward configuration used by `kgrl_reward.py`.
 - `--device`: visible GPU IDs.
+- `--now`: experiment identifier used for checkpoint and logging paths.
 
 By default, checkpoints are saved under:
 
@@ -153,14 +154,24 @@ To evaluate a trained checkpoint on MMedBench, run:
 
 ```bash
 bash scripts/test_checkpoint_mmedbench.sh \
-  --subset=vanilla \
+  --subset=2hop \
   --language=English \
   --model=Qwen2.5-7B-Instruct \
-  --kgrl_reward_mode=full_lambda2 \
+  --kgrl_reward_mode=light_weighted_eweight0_alpha2_beta3 \
   --ckpt=last \
-  --now=<experiment_timestamp>_2hop \
+  --now=<experiment_timestamp> \
   --devices=0,1,2,3
 ```
+
+Main arguments:
+
+- `--subset`: data subset directory under `data/MMedBench/`.
+- `--language`: language subset used for evaluation.
+- `--model`: local model directory name under `models/`.
+- `--kgrl_reward_mode`: reward configuration associated with the evaluated checkpoint.
+- `--ckpt`: checkpoint name. Use `last` to automatically resolve the latest checkpoint.
+- `--now`: experiment identifier used to locate the checkpoint and output directory.
+- `--devices`: visible GPU IDs.
 
 The argument `--ckpt=last` automatically resolves the latest checkpoint recorded in the experiment directory. A specific checkpoint can also be provided, for example:
 
